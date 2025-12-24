@@ -1,0 +1,36 @@
+replicaCount: 1
+
+image:
+  repository: image-registry.openshift-image-registry.svc:5000/REPLACE_NS/maximo-mcp
+  tag: latest
+  pullPolicy: Always
+
+service:
+  port: 8080
+
+route:
+  enabled: true
+  host: ""
+  tls:
+    enabled: true
+    termination: edge
+
+config:
+  tenantHeader: x-tenant-id
+  toolCatalogLimit: 128
+  configWriteEnabled: false
+  adminToken: ""
+  tenantsFile: /opt/app-root/src/data/tenants.json
+
+persistence:
+  enabled: true
+  existingClaim: ""
+  size: 1Gi
+  storageClassName: ""
+  mountPath: /opt/app-root/src/data
+
+tenantsSecret:
+  create: false
+  name: maximo-mcp-tenants
+  key: tenants.json
+  mount: false

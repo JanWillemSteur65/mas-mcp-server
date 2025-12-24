@@ -1,0 +1,16 @@
+{{- if .Values.route.enabled }}
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: {{ include "maximo-mcp.fullname" . }}
+spec:
+  to: { kind: Service, name: {{ include "maximo-mcp.fullname" . }} }
+  port: { targetPort: http }
+  {{- if .Values.route.tls.enabled }}
+  tls:
+    termination: {{ .Values.route.tls.termination }}
+  {{- end }}
+  {{- if .Values.route.host }}
+  host: {{ .Values.route.host }}
+  {{- end }}
+{{- end }}

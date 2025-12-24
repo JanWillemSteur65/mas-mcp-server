@@ -1,0 +1,18 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: maximo-mcp
+spec:
+  source:
+    type: Git
+    git:
+      uri: https://github.com/JanWillemSteur65/mas-mcp-server.git
+    contextDir: .
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Containerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: maximo-mcp:latest

@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "maximo-mcp.fullname" . }}
+  labels:
+    app: {{ include "maximo-mcp.name" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ include "maximo-mcp.name" . }}
+  template:
+    metadata:
+      labels:
+        app: {{ include "maximo-mcp.name" . }}
+    spec:
+      containers:
+        - name: maximo-mcp
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: TENANT_HEADER
+              value: "{{ .Values.config.tenantHeader }}"
+            - name: TOOL_CATALOG_LIMIT
+              value: "{{ .Values.config.toolCatalogLimit }}"
+            - name: TENANTS_FILE
+              value: "{{ .Values.config.tenantsFile }}"
+            - name: CONFIG_WRITE_ENABLED
+              value: "{{ .Values.config.configWriteEnabled }}"
+            - name: ADMIN_TOKEN
+              value: "{{ .Values.config.adminToken }}"
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: ["ALL"] }
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.persistence.mountPath }}
+            {{- if .Values.tenantsSecret.mount }}
+            - name: tenants
+              mountPath: /etc/maximo-mcp
+              readOnly: true
+            {{- end }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{- if .Values.persistence.existingClaim -}}
+              {{ .Values.persistence.existingClaim }}
+            {{- else -}}
+              {{ include "maximo-mcp.fullname" . }}-data
+            {{- end }}
+        {{- if .Values.tenantsSecret.mount }}
+        - name: tenants
+          secret:
+            secretName: {{ .Values.tenantsSecret.name }}
+        {{- end }}

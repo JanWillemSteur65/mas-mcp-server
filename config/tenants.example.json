@@ -1,0 +1,73 @@
+[
+  {
+    "id": "salm",
+    "name": "MAS9 SALM tenant",
+    "mode": "api-key",
+    "baseUrl": "https://salm.manage.salm.apps.mas9.znapz.net",
+    "apiKey": {
+      "env": "dqbuec45a6ea86ikgujc3oa6fd0gv0vhvjjuoh82"
+    },
+    "org": "ESA",
+    "site": "WATER",
+    "toolNamespace": "maximo.discovered",
+    "memoryEnabled": true,
+    "rbac": {
+      "roles": {
+        "anonymous": [
+          "tools:maximo.assets.read",
+          "tools:maximo.locations.read",
+          "tools:approvals.read"
+        ],
+        "user": [
+          "tools:maximo.assets.read",
+          "tools:maximo.locations.read",
+          "tools:maximo.workorders.read",
+          "tools:approvals.read"
+        ],
+        "admin": [
+          "*"
+        ]
+      }
+    },
+    "authMode": "apiKey"
+  },
+  {
+    "id": "salm-maxauth",
+    "name": "MAS9 SALM tenant (maxauth example)",
+    "mode": "api-key",
+    "baseUrl": "https://salm.manage.salm.apps.mas9.znapz.net",
+    "org": "ESA",
+    "site": "WATER",
+    "toolNamespace": "maximo.discovered",
+    "memoryEnabled": true,
+    "rbac": {
+      "roles": {
+        "anonymous": [
+          "tools:maximo.assets.read",
+          "tools:maximo.locations.read",
+          "tools:approvals.read"
+        ],
+        "user": [
+          "tools:maximo.assets.read",
+          "tools:maximo.locations.read",
+          "tools:maximo.workorders.read",
+          "tools:approvals.read"
+        ],
+        "admin": [
+          "*"
+        ]
+      }
+    },
+    "authMode": "maxauth",
+    "maxauth": {
+      "usernameRef": {
+        "type": "env",
+        "name": "MAXIMO_USERNAME"
+      },
+      "passwordRef": {
+        "type": "env",
+        "name": "MAXIMO_PASSWORD"
+      }
+    }
+  }
+]

@@ -1,0 +1,128 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: maximo-mcp-data
+  labels:
+    app: maximo-mcp
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: maximo-mcp
+  labels:
+    app: maximo-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: maximo-mcp
+  template:
+    metadata:
+      labels:
+        app: maximo-mcp
+    spec:
+      containers:
+        - name: maximo-mcp
+          image: image-registry.openshift-image-registry.svc:5000/mas-mcp-server/maximo-mcp:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: maximo-mcp-openai
+            - secretRef:
+                name: maximo-mcp-anthropic
+            - secretRef:
+                name: maximo-mcp-gemini
+            - secretRef:
+                name: maximo-mcp-mistral
+            - secretRef:
+                name: maximo-mcp-watsonx
+            - secretRef:
+                name: salm-maximo-apikey
+            - secretRef:
+                name: salm-water-apikey
+            - secretRef:
+                name: salm-bikes-apikey
+            - secretRef:
+                name: salm-general-apikey    
+          env:
+            - name: PORT
+              value: "8080"
+            - name: TENANT_HEADER
+              value: "x-tenant-id"
+            - name: TOOL_CATALOG_LIMIT
+              value: "128"
+            - name: TENANTS_FILE
+              value: "/opt/app-root/src/data/tenants.json"
+            - name: CONFIG_WRITE_ENABLED
+              value: "true"
+            - name: OPENAI_MODELS
+              value: "gpt-5.2"
+            - name: GEMINI_MODELS
+              value: Gemini 2.5 Pro
+            - name: MISTRAL_MODELS
+              value: 'mistral-medium-2505,mistral-large-latest'  
+            - name: APPROVALS_ENABLED
+              value: "true"
+            # Optional: set ADMIN_TOKEN and provide x-admin-token from the UI for write operations
+            - name: ADMIN_TOKEN
+              value: "n7YsB-2EnobzJFd7Sw_IJOI_iWjNIfEw0aK1Pe-me6G6SJIehnJH_0g0LAkWlWdxPnMivchBTTmigV6LBqIHiw"
+          # Optional AI secrets (uncomment the ones you created)
+          # envFrom:
+          #   - secretRef: { name: maximo-mcp-openai }
+          #   - secretRef: { name: maximo-mcp-watsonx }
+          volumeMounts:
+            - name: data
+              mountPath: /opt/app-root/src/data
+          readinessProbe:
+            httpGet: { path: /readyz, port: http }
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: http }
+            initialDelaySeconds: 10
+            periodSeconds: 20
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: maximo-mcp-data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: maximo-mcp
+  labels:
+    app: maximo-mcp
+spec:
+  selector:
+    app: maximo-mcp
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: maximo-mcp
+  labels:
+    app: maximo-mcp
+spec:
+  to:
+    kind: Service
+    name: maximo-mcp
+  port:
+    targetPort: http
+  tls:
+    termination: edge
