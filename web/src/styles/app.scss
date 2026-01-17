@@ -1,0 +1,32 @@
+@use "@carbon/react";
+
+body { margin: 0; }
+
+.loginShell {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+}
+
+.loginLeft {
+  background: #0f62fe;
+  color: white;
+  padding: 3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.loginLeft img {
+  max-width: 420px;
+  width: 100%;
+  margin-top: 2rem;
+  border-radius: 12px;
+}
+
+.loginRight {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}

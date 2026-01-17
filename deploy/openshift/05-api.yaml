@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mas-mcp-api
+  namespace: mas-mcp-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mas-mcp-api
+  template:
+    metadata:
+      labels:
+        app: mas-mcp-api
+    spec:
+      containers:
+        - name: api
+          image: image-registry.openshift-image-registry.svc:5000/mas-mcp-server/mas-mcp-api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: mas-mcp-config
+            - secretRef:
+                name: mas-mcp-secrets
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mas-mcp-api
+  namespace: mas-mcp-server
+spec:
+  selector:
+    app: mas-mcp-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: 8000
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: mas-mcp-api
+  namespace: mas-mcp-server
+spec:
+  to:
+    kind: Service
+    name: mas-mcp-api
+  port:
+    targetPort: http
+  tls:
+    termination: edge

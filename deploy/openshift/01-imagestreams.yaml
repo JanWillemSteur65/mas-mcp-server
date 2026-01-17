@@ -1,0 +1,23 @@
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: mas-mcp-api
+  namespace: mas-mcp-server
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: mas-mcp-web
+  namespace: mas-mcp-server
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: postgres
+  namespace: mas-mcp-server
+spec:
+  tags:
+    - name: "15"
+      from:
+        kind: DockerImage
+        name: postgres:15

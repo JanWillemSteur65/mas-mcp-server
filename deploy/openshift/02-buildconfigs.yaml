@@ -1,0 +1,43 @@
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: mas-mcp-api
+  namespace: mas-mcp-server
+spec:
+  source:
+    type: Git
+    git:
+      uri: REPLACE_WITH_YOUR_GIT_URL
+    contextDir: api
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: mas-mcp-api:latest
+  triggers:
+    - type: ConfigChange
+---
+apiVersion: build.openshift.io/v1
+kind: BuildConfig
+metadata:
+  name: mas-mcp-web
+  namespace: mas-mcp-server
+spec:
+  source:
+    type: Git
+    git:
+      uri: REPLACE_WITH_YOUR_GIT_URL
+    contextDir: web
+  strategy:
+    type: Docker
+    dockerStrategy:
+      dockerfilePath: Dockerfile
+  output:
+    to:
+      kind: ImageStreamTag
+      name: mas-mcp-web:latest
+  triggers:
+    - type: ConfigChange
